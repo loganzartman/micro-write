@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>μwrite</title>
+	<meta charset='utf-8'>
+	<script src="micro.js"></script>
+	<link type="text/css" rel="stylesheet" href="micro.css">
+	<link href='https://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+</head>
+<body>
+	<div id="container">
+		<div id="occ">
+			<span class="bubble" id="stats" alt="Click to zero, double-click to reset."></span>
+			<span class="bubble" id="status">μ</span>
+			<span class="bubble" id="controls">
+				<a onclick="micro.evt.bright">☀</a>&nbsp;❘&nbsp;
+				<a onclick="micro.evt.spellcheck">sp ✓</a>
+			</span>
+		</div>
+		<textarea id="text" spellcheck="true"></textarea>
+		<div id="infobox">
+			<h1>μwrite</h1>
+			<h3>Because μ need to write.</h3>
+			Text and settings are automatically saved locally.<br> Click the word count to zero it, or double-click to reset. It is aware of selections. Click the sun to turn off the lights. Click the <i>sp</i> to toggle spell check (requires reload). Click the <i>μ</i> to read this again.<br>
+			<i style="font-size: 0.7em;">soon: drive integration, multi-project</i><br>
+			<button id="infook">OK</button>
+		</div>
+	</div>
+</body>
+</html>

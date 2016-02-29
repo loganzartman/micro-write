@@ -1,0 +1,154 @@
+html, body {
+	background: #DCE3CF;
+	transition: background 0.1s ease;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+#infobox {
+	font-family: 'Droid Serif';
+	position: absolute;
+	width: 40em;
+	min-height: 8em;
+	padding: 2em;
+	padding-top: 1em;
+	box-sizing: border-box;
+	border-radius: 6px;
+	top: 10em;
+	left: 50%;
+	margin-left: -20em;
+	background: #DCE3CF;
+	color: #283941;
+	box-shadow: inset 0px 0px 0px 1px #A7C4B5;
+	text-align: justify;
+	visibility: hidden;
+}
+
+#infook {
+	font-family: 'Droid Serif';
+	color: #A7C4B5;
+	background: none;
+	box-shadow: inset 0px 0px 0px 1px #A7C4B5;
+	border: none;
+	padding: 0.25em 0.5em;
+	border-radius: 3px;
+	margin-top: 1em;
+	width: 5em;
+}
+
+#container {
+	position: absolute;
+	width: 50em;
+	top: 4em;
+	left: 50%;
+	margin-left: -25em;
+	bottom: 0;
+}
+
+#occ {
+	opacity: 0.3;
+	transition: opacity 0.1s ease;
+	cursor: default;
+}
+
+#occ:hover{
+	opacity: 1.0;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+#stats {
+	padding: 0.1em 0.6em;
+	word-spacing: 0.5em;
+	cursor: pointer;
+}
+
+.bubble {
+	font-size: 1em;
+	font-family: 'Droid Serif';
+	background: none;
+	border-radius: 3px;
+	padding: 0.1em 0.4em;
+	box-shadow: inset 0px 0px 0px 1px #283941;
+	color: #283941;
+}
+
+.bubble-dark {
+	box-shadow: inset 0px 0px 0px 1px #A7C4B5;
+	color: #A7C4B5;
+}
+
+.dark {
+	color: #DCE3CF !important;
+	background: #283941 !important;
+}
+.bright {
+	background: #DCE3CF !important;
+	color: #283941 !important;
+}
+
+#controls {
+	float: right;
+	cursor: pointer;
+}
+
+#text {
+	width: 100%;
+	border: none;
+	font-family: 'Droid Serif';
+	font-size: 1em;
+	position: absolute;
+	top: 2em;
+	bottom: 0;
+	background: #DCE3CF;
+	color: #283941;
+	bottom: 2em;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding-right: 1em;
+	text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.5em;
+    transition: background 0.1s ease;
+    resize: none;
+}
+
+::selection {
+	color: #FCFFF5;
+	background: #B7BAB0;
+}
+
+::-moz-selection {
+	color: #FCFFF5;
+	background: #B7BAB0;
+}
+
+::-ms-selection {
+	color: #FCFFF5;
+	background: #B7BAB0;
+}
+
+#text:focus {
+	outline: none;
+}
+
+/* Let's get this party started */
+::-webkit-scrollbar {
+	width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	border: 1px solid #A7C4B5;
+	border-radius: 3px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	border-radius: 3px;
+	background: #A7C4B5; 
+}
