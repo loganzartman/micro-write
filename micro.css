@@ -67,6 +67,11 @@ a {
 	cursor: pointer;
 }
 
+.info {
+	padding-left: 2em;
+	font-family: monospace;
+}
+
 .bubble {
 	font-size: 1em;
 	font-family: 'Droid Serif';

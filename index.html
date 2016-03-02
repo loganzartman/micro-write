@@ -4,6 +4,8 @@
 	<title>μwrite</title>
 	<meta charset='utf-8'>
 	<script src="micro.js"></script>
+	<script src="drivesync.js"></script>
+	<script type="text/javascript" src="https://apis.google.com/js/client.js?onload=DSHandleClientLoad"></script>
 	<link type="text/css" rel="stylesheet" href="micro.css">
 	<link href='https://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
 </head>
@@ -12,6 +14,7 @@
 		<div id="occ">
 			<span class="bubble" id="stats" alt="Click to zero, double-click to reset."></span>
 			<span class="bubble" id="status">μ</span>
+			<span class="info" id="info">starting up...</span>
 			<span class="bubble" id="controls">
 				<a onclick="micro.evt.bright">☀</a>&nbsp;❘&nbsp;
 				<a onclick="micro.evt.spellcheck">sp ✓</a>
@@ -20,9 +23,17 @@
 		<textarea id="text" spellcheck="true"></textarea>
 		<div id="infobox">
 			<h1>μwrite</h1>
-			<h3>Because μ need to write.</h3>
-			Text and settings are automatically saved locally.<br> Click the word count to zero it, or double-click to reset. It is aware of selections. Click the sun to turn off the lights. Click the <i>sp</i> to toggle spell check (requires reload). Click the <i>μ</i> to read this again.<br>
-			<i style="font-size: 0.7em;">soon: drive integration, multi-project</i><br>
+			<h4><i>because μ need to write</i></h4>
+			Text is magically saved either on Google Drive or on your local machine.  Note that μwrite is not designed for collaboration, and editing from multiple devices at once will cause conflicts.  No worries, though--just delete whatever you don't want.<br><br>
+			<b>Features</b>
+			<ul>
+				<li>Click the word count to zero it, or double-click to reset.</li>
+				<li>Select something to count words or zero based on the selection.</li>
+				<li>Click the sun to turn off the lights.</li>
+				<li>Click the <i>sp</i> to toggle spell check (requires reload).</li>
+				<li>Click the <i>μ</i> to read this again.</li>
+			</ul>
+			<i style="font-size: 0.7em;">soon: multi-project, simple formatting</i><br>
 			<button id="infook">OK</button>
 		</div>
 	</div>

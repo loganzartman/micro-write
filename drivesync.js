@@ -7,12 +7,19 @@ var DS = {
     ],
 
     _fid: null,
+    loaded: false,
+    ready: false,
+    authorized: false,
     
     /**
      * Called when the client library is loaded.
     */
     handleClientLoad: function() {
+        if (!micro.loaded || DS.loaded) return;
+        DS.loaded = true;
         DS._log("Client load");
+        micro.evt.readyStatus(false);
+        micro.evt.authStatus(false);
         DS.checkAuth();
     },
 
@@ -32,18 +39,25 @@ var DS = {
      * @param {Object} authResult Authorization result.
      */
     handleAuthResult: function(authResult) {
-        if (authResult) {
+        if (authResult && !authResult.error) {
             // Access token has been successfully retrieved, requests can be sent to the API
             DS._log("Authorized");
+            DS.authorized = true;
+            micro.evt.authStatus(true);
             gapi.client.load('drive', 'v2', DS.apiLoad);
         } else {
             // No access token could be retrieved, force the authorization flow.
-            gapi.auth.authorize({
-                "client_id": CLIENT_ID,
-                "scope": SCOPES,
-                "immediate": false
-            }, DS.handleAuthResult);
+            micro.evt.authStatus(false);
+            micro.setInfo("<a href=\"javascript:DS.authClick()\">click to connect Google Drive</a>");
         }
+    },
+
+    authClick: function() {
+        gapi.auth.authorize({
+            "client_id": DS.CLIENT_ID,
+            "scope": DS.SCOPES, 
+            "immediate": false
+        }, DS.handleAuthResult);
     },
     
     /**
@@ -52,9 +66,8 @@ var DS = {
     apiLoad: function() {
         DS.getDataFile(function(file){
             var f = function(file) {
-                DS.updateDataFile("{\"test\": 420}", function(file){
-                    DS._log("Test data written");
-                });
+                DS.ready = true;
+                micro.evt.readyStatus(true);
             }
             if (!file) {DS._log("File DNE, creating");DS.createDataFile(f);}
             else {DS._log("File exists, continuing");f(file);}

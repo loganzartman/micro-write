@@ -1,5 +1,6 @@
 var micro = {
 	runonce: false,
+	loaded: false,
 	text: null,
 	stats: null,
 	status: null,
@@ -10,6 +11,10 @@ var micro = {
 	zeroSet: false,
 	dark: false,
 	infoboxVisible: false,
+	syncFail: false,
+	keyPressed: false,
+	_tbuf: "",
+	_lastInfoSet: 0,
 
 	noreplace: false,
 	replaceMap: {
@@ -20,10 +25,12 @@ var micro = {
 		micro.text = document.getElementById("text");
 		micro.stats = document.getElementById("stats");
 		micro.status = document.getElementById("status");
+		micro.info = document.getElementById("info");
 		micro.infobox = document.getElementById("infobox");
 		micro.infook = document.getElementById("infook");
 		micro.controls = document.getElementById("controls");
 		micro.stxt = micro.status.innerHTML;
+		micro.text.addEventListener("keydown", micro.evt.keydown, false);
 		micro.text.addEventListener("keyup", micro.evt.keypress, false);
 		document.addEventListener("mouseup", micro.evt.mouseup, false);
 		micro.text.addEventListener("blur", micro.evt.blur, false);
@@ -39,10 +46,14 @@ var micro = {
 		micro.writeStats();
 		micro.evt.blur();
 
+		setInterval(micro.evt.checkSync, 1500);
+
 		//tempfix for ff/ie
 		if (micro.text.offsetHeight < window.innerHeight/2) {
 			micro.text.style.height = (window.innerHeight-micro.text.offsetTop-container.offsetTop)+"px";
 		}
+		micro.loaded = true;
+		DS.handleClientLoad();
 	},
 
 	recall: function() {
@@ -55,6 +66,8 @@ var micro = {
 		var dark = localStorage.getItem("dark");
 		micro.dark = dark===null?false:dark==="true";
 		if (dark) micro.evt.bright(false);
+
+		micro.localModifyTime = localStorage.getItem("localModifyTime");
 
 		if (localStorage.getItem("spellcheck") == "false") {
 			micro.evt.spellcheck({target: micro.controls.children[1]});
@@ -72,6 +85,8 @@ var micro = {
 		localStorage.setItem("dark", micro.dark);
 		localStorage.setItem("stats0", JSON.stringify(micro.stats0));
 		localStorage.setItem("spellcheck", micro.text.getAttribute("spellcheck"));
+		micro.localModifyTime = new Date();
+		localStorage.setItem("localModifyTime", micro.localModifyTime);
 	},
 
 	count: function(text, regex) {
@@ -108,8 +123,17 @@ var micro = {
 	},
 
 	evt: {
+		keydown: function(event) {
+			if (event.keyCode === 9) {
+				event.preventDefault();
+				document.execCommand("insertText", false, "\t");
+			}
+		},
+
 		keypress: function(event) {
 			micro.store();
+			micro.setInfo("");
+			micro.keyPressed = true;
 			micro.writeStats();
 		},
 
@@ -165,6 +189,112 @@ var micro = {
 			micro.infobox.style.visibility = micro.infoboxVisible?"hidden":"visible";
 			micro.infobox.style.opacity = micro.infoboxVisible?"0.0":"1.0";
 			micro.infoboxVisible = !micro.infoboxVisible;
+		},
+
+		authStatus: function(status) {
+			if (status) {
+				micro.text.enabled = true;
+				micro.text.style.background = "lime";
+			}
+			else {
+				micro.syncFail = true;
+				micro.text.enabled = false;
+				micro.text.style.background = "red";
+			}
+		},
+
+		readyStatus: function(status) {
+			if (status) {
+				micro.pull();
+			}
+		},
+
+		checkSync: function() {
+			if (!micro.syncFail && micro.keyPressed) {
+				if (micro._tbuf !== micro.text.value) {
+					micro._tbuf = micro.text.value;
+					micro.push();
+					micro.keyPressed = false;
+				}
+			}
+		}
+	},
+
+	setInfo: function(str) {
+		if (Date.now() - micro._lastInfoSet < 200) return;
+		micro._lastInfoSet = Date.now();
+		micro.info.innerHTML = str;
+	},
+
+	pull: function() {
+		if (!DS.ready) return false;
+		micro.setInfo("loading...");
+		if (DS.authorized) {
+			DS.getDataFile(function(file){
+				if (file) {
+					var localModifyTime = new Date(micro.localModifyTime);
+					DS.getDataContents(function(data){
+						if (data && (typeof data.text !== "undefined")) {
+							var remoteModifyTime = new Date(data.remoteModifyTime);
+							micro.syncFail = false;
+							if (remoteModifyTime - localModifyTime > 0) {
+								micro.setInfo("loaded remotely");
+								micro.text.value = data.text;
+							}
+							else {
+								micro.setInfo("sync conflict!");
+								micro.text.value = "CONFLICT: Local data newer than remote.\r\n" + 
+									"You might have left quickly or disconnected.  Just remove whatever data you don't need.\r\n...\r\n\r\n" + 
+									"[LOCAL Data from "+localModifyTime+"]\r\n" + localStorage.getItem("text") + "\r\n\r\n[REMOTE Data from "+remoteModifyTime+"]\r\n" + data.text;
+							}
+						}
+						else {
+							micro.setInfo("loaded locally");
+						}
+					});
+
+				}
+				else {
+					micro.setInfo("retrying remote load");
+					micro.syncFail = true;
+					setTimeout(function(){
+						micro.pull();
+					}, 2000);
+				}
+			});
+		}
+		else {
+			micro.setInfo("loaded locally");
+			micro.recall();
+		}
+	},
+
+	push: function() {
+		if (!DS.ready) return false;
+		micro.setInfo("saving...");
+		if (DS.authorized) {
+			DS.getDataFile(function(file){
+				if (file) {
+					DS.updateDataFile({
+						"text": micro.text.value,
+						"remoteModifyTime": new Date()
+					}, function(resp){
+						micro.setInfo("saved remotely");
+						micro.syncFail = false;
+					});
+				}
+				else {
+					micro.setInfo("retrying remote save");
+					micro.syncFail = true;
+					setTimeout(function(){
+						micro.push();
+					}, 2000);
+				}
+			});
+		}
+		else {
+			micro.setInfo("saved locally");
+			micro.store();
 		}
 	}
 };
