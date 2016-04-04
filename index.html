@@ -5,6 +5,7 @@
 	<meta charset='utf-8'>
 	<script src="micro.js"></script>
 	<script src="drivesync.js"></script>
+	<script src="base64.min.js"></script>
 	<script type="text/javascript" src="https://apis.google.com/js/client.js?onload=DSHandleClientLoad"></script>
 	<link type="text/css" rel="stylesheet" href="micro.css">
 	<link href='https://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
@@ -20,6 +21,7 @@
 				<a onclick="micro.evt.spellcheck">sp ✓</a>
 			</span>
 		</div>
+		<!-- <div id="text" contenteditable="true" spellcheck="true"></div> -->
 		<textarea id="text" spellcheck="true"></textarea>
 		<div id="infobox">
 			<h1>μwrite</h1>
@@ -32,8 +34,10 @@
 				<li>Click the sun to turn off the lights.</li>
 				<li>Click the <i>sp</i> to toggle spell check (requires reload).</li>
 				<li>Click the <i>μ</i> to read this again.</li>
+				<li>Fully supports unicode!</li>
 			</ul>
 			<i style="font-size: 0.7em;">soon: multi-project, simple formatting</i><br>
+			<span style="font-size: 0.7em;" id="vid">version</span><br>
 			<button id="infook">OK</button>
 		</div>
 	</div>

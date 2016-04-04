@@ -1,4 +1,5 @@
 var micro = {
+	VERSION: 1004,
 	runonce: false,
 	loaded: false,
 	text: null,
@@ -11,10 +12,12 @@ var micro = {
 	zeroSet: false,
 	dark: false,
 	infoboxVisible: false,
+	caughtUp: false,
 	syncFail: false,
 	keyPressed: false,
 	_tbuf: "",
 	_lastInfoSet: 0,
+	_infoHideTime: 0,
 
 	noreplace: false,
 	replaceMap: {
@@ -23,12 +26,14 @@ var micro = {
 
 	load: function() {
 		micro.text = document.getElementById("text");
+		micro.text.disabled = true;
 		micro.stats = document.getElementById("stats");
 		micro.status = document.getElementById("status");
 		micro.info = document.getElementById("info");
 		micro.infobox = document.getElementById("infobox");
 		micro.infook = document.getElementById("infook");
 		micro.controls = document.getElementById("controls");
+		document.getElementById("vid").innerHTML = "v"+micro.VERSION;
 		micro.stxt = micro.status.innerHTML;
 		micro.text.addEventListener("keydown", micro.evt.keydown, false);
 		micro.text.addEventListener("keyup", micro.evt.keypress, false);
@@ -47,6 +52,15 @@ var micro = {
 		micro.evt.blur();
 
 		setInterval(micro.evt.checkSync, 1500);
+		setInterval(function(){
+			micro._infoHideTime = Math.max(0, micro._infoHideTime - 1);
+			if (micro._infoHideTime > 0) {
+				micro.info.style.visibility = "hidden";
+			}
+			else {
+				micro.info.style.visibility = "visible";
+			}
+		},200);
 
 		//tempfix for ff/ie
 		if (micro.text.offsetHeight < window.innerHeight/2) {
@@ -80,6 +94,7 @@ var micro = {
 	},
 
 	store: function() {
+		if (!micro.caughtUp) return;
 		localStorage.setItem("text", micro.text.value);
 		localStorage.setItem("zeroSet", micro.zeroSet);
 		localStorage.setItem("dark", micro.dark);
@@ -109,6 +124,10 @@ var micro = {
 		return slice;
 	},
 
+	setText: function(str) {
+		micro.text.value = str;
+	},
+
 	writeStats: function() {
 		var stats = micro.getStats(micro.getText());
 		micro.stats.innerHTML = (stats.words-micro.stats0.words)+"w"+"\t"
@@ -131,8 +150,8 @@ var micro = {
 		},
 
 		keypress: function(event) {
-			micro.store();
-			micro.setInfo("");
+			if (micro.caughtUp) micro.store();
+			micro._infoHideTime = 5;
 			micro.keyPressed = true;
 			micro.writeStats();
 		},
@@ -164,6 +183,7 @@ var micro = {
 				micro.store();
 			}
 			var d = micro.dark?"dark":"bright";
+			document.getElementById("occ").className = d;
 			micro.text.className = d;
 			document.documentElement.className = d;
 			d = "bubble "+(micro.dark?"bubble-dark":"");
@@ -194,13 +214,17 @@ var micro = {
 		authStatus: function(status) {
 			if (status) {
 				micro.text.enabled = true;
-				micro.text.style.background = "lime";
 			}
 			else {
 				micro.syncFail = true;
 				micro.text.enabled = false;
-				micro.text.style.background = "red";
 			}
+		},
+
+		catchUp: function() {
+			micro.caughtUp = true;
+			micro.text.disabled = false;
+			micro.text.focus();
 		},
 
 		readyStatus: function(status) {
@@ -235,17 +259,21 @@ var micro = {
 					var localModifyTime = new Date(micro.localModifyTime);
 					DS.getDataContents(function(data){
 						if (data && (typeof data.text !== "undefined")) {
+							micro.evt.catchUp();
 							var remoteModifyTime = new Date(data.remoteModifyTime);
 							micro.syncFail = false;
-							if (remoteModifyTime - localModifyTime > 0) {
+							if (data.b64) data.text = Base64.decode(data.text);
+							if (remoteModifyTime - localModifyTime > 0 || data.text === localStorage.getItem("text")) {
 								micro.setInfo("loaded remotely");
-								micro.text.value = data.text;
+								micro.setText(data.text);
 							}
 							else {
 								micro.setInfo("sync conflict!");
-								micro.text.value = "CONFLICT: Local data newer than remote.\r\n" + 
-									"You might have left quickly or disconnected.  Just remove whatever data you don't need.\r\n...\r\n\r\n" + 
-									"[LOCAL Data from "+localModifyTime+"]\r\n" + localStorage.getItem("text") + "\r\n\r\n[REMOTE Data from "+remoteModifyTime+"]\r\n" + data.text;
+								micro.setText(
+									"CONFLICT: Local data newer than remote.\r\n" +
+									"You might have left quickly or disconnected.  Just remove whatever data you don't need.\r\n...\r\n\r\n" +
+									"[LOCAL Data from "+localModifyTime+"]\r\n" + localStorage.getItem("text") + "\r\n\r\n[REMOTE Data from "+remoteModifyTime+"]\r\n" + data.text
+								);
 							}
 						}
 						else {
@@ -264,19 +292,21 @@ var micro = {
 			});
 		}
 		else {
+			micro.evt.catchUp();
 			micro.setInfo("loaded locally");
 			micro.recall();
 		}
 	},
 
 	push: function() {
-		if (!DS.ready) return false;
+		if (!DS.ready || !micro.caughtUp) return false;
 		micro.setInfo("saving...");
 		if (DS.authorized) {
 			DS.getDataFile(function(file){
 				if (file) {
 					DS.updateDataFile({
-						"text": micro.text.value,
+						"b64": true,
+						"text": Base64.encode(micro.text.value),
 						"remoteModifyTime": new Date()
 					}, function(resp){
 						micro.setInfo("saved remotely");

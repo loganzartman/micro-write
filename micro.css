@@ -29,9 +29,8 @@ a {
 
 #infook {
 	font-family: 'Droid Serif';
-	color: #A7C4B5;
-	background: none;
-	box-shadow: inset 0px 0px 0px 1px #A7C4B5;
+	color: #DCE3CF;
+	background: #283941;
 	border: none;
 	padding: 0.25em 0.5em;
 	border-radius: 3px;
@@ -51,7 +50,16 @@ a {
 #occ {
 	opacity: 0.3;
 	transition: opacity 0.1s ease;
+	border-radius: 2px;
+	padding: 3px 12px;
 	cursor: default;
+	color: #DCE3CF !important;
+	background: #283941 !important;
+}
+
+#occ.dark {
+	background: #DCE3CF !important;
+	color: #283941 !important;
 }
 
 #occ:hover{
@@ -78,13 +86,11 @@ a {
 	background: none;
 	border-radius: 3px;
 	padding: 0.1em 0.4em;
-	box-shadow: inset 0px 0px 0px 1px #283941;
-	color: #283941;
 }
 
 .bubble-dark {
-	box-shadow: inset 0px 0px 0px 1px #A7C4B5;
-	color: #A7C4B5;
+/*	box-shadow: inset 0px 0px 0px 1px #A7C4B5;*/
+/*	color: #A7C4B5;*/
 }
 
 .dark {
@@ -97,7 +103,9 @@ a {
 }
 
 #controls {
-	float: right;
+	position: absolute;
+	right: 8px;
+	top: 0px;
 	cursor: pointer;
 }
 
